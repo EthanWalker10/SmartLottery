@@ -73,11 +73,7 @@ contract RaffleTest is Test, CodeConstants {
     }
 
     /*//////////////////////////////////////////////////////////////
-                              ENTER RAFFLE
-            1. We check if the `msg.value` is high enough;
-            2. We check if the `RaffleState` is `OPEN`;
-            3. If all of the above are `true` then the `msg.sender` should be pushed in the `s_players` array;
-            4. Our function emits the `EnteredRaffle` event.
+                        REGISTER & ENTER RAFFLE
     //////////////////////////////////////////////////////////////*/
 
     function testtestRaffleRevertsWHenYouDontRegister() public {

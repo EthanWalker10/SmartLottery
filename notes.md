@@ -75,4 +75,9 @@
 5. **重要**: 上面的流程在单元测试 Raffle 的时候出现问题, 错误在于实现部署在 anvil 上的 EthanToken 合约在 test 中使用会报错. 于是改变了 Helper 脚本中构造 anvil 环境中 EthanToken 合约的逻辑, 现在改为直接在 Helper 中 new 代币合约
 6. 完成了目前的所有测试函数, 唯一的疑惑点就是: 执行最后一个测试时, requestId 和 randomNum 每一次都是一样的:
    1. 查看 mock 逻辑, 随机数是根据 requestId 和 请求数组下标组合哈希生成的, 那么只要这两个不变, 那随机数就不变.
+   2. mock 逻辑和真正的链上逻辑是不一样的, mock 实现简单
 7. 基于 6, 进一步探索了 vrfCoordinator 的实现逻辑, 真正的 vrfCoordinator 实现逻辑是很复杂的, 涉及与真正的随机数生成合约的交互(零知识证明), 也就是说, VRFCoordinatorV2_5 和 VRFCoordinatorV2_5Mock 合约不是同一个类型(其函数参数都不一样), 那为什么 Interactions.s.sol 在创建订阅时直接将 VRFCoordinatorV2_5 转换成了 VRFCoordinatorV2_5Mock 类型? 
+   1. 那么这里就还是准备在实际部署到非本地链的时候, 手动设置好配置. 因为事实上 sepolia 和 mainnet 的 VRFCoordinator 都不一样. 不太好弄自动化
+8. **除开上面的小插曲, 一切测试顺利! 也成功为 winner 铸造了 NFT!** 接下来考虑更加严谨的 mint 权限控制
+   1. token: 写测试函数的时候, 是直接在脚本里 new 的, 但是实际部署的时候, 还是应该单独部署然后写进配置里. 因为需要同时给 merkleDrop 和 Raffle 两个合约转账. 
+   2. nft: 

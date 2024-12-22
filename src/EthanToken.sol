@@ -9,7 +9,7 @@ contract EthanToken is ERC20 {
         _mint(msg.sender, initialSupply);
     }
 
-    // 仅供 test 函数中使用, 实际部署不能有这个函数
+    // only for testing
     function mint(address to, uint256 value) public {
         _mint(to, value);
     }
