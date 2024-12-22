@@ -4,6 +4,10 @@ pragma solidity 0.8.24;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title EthanNft - mint NFTs for winners of the game
+ * @author Ethan Walker
+ */
 contract EthanNft is ERC721, Ownable {
     error EthanNft__TokenUriNotFound();
 

@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 import {Script} from "forge-std/Script.sol";
 import {EthanToken} from "../src/EthanToken.sol";
 
-// 这里其实也需要根据 chainId 来创建一个新的 EthanToken, 因为不同的链, 部署者的地址是不同的
 
 contract DeployEthanToken is Script {
     uint256 constant INITIAL_SUPPLY = 1000000 ether;

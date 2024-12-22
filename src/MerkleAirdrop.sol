@@ -10,9 +10,7 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 
 /**
  * @title Merkle Airdrop - Airdrop tokens to users who can prove they are in a merkle tree
- * @author Ciara Nightingale
- * @author Patrick Collins
- * @author Cyfrin
+ * @author Ethan Walker
  */
 contract MerkleAirdrop is EIP712 {
     using ECDSA for bytes32;

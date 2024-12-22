@@ -9,9 +9,6 @@ import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VR
 import {LinkToken} from "../test/mock/LinkToken.sol";
 import {CodeConstants} from "./HelperConfig.s.sol";
 
-// This is where we'll take care of the subscription creation.
-
-// 创建一个新的 Chainlink VRF v2.5 订阅
 contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() public returns (uint256, address) {
         HelperConfig helperConfig = new HelperConfig();
@@ -36,7 +33,7 @@ contract CreateSubscription is Script {
     }
 }
 
-// 将消费者合约（即需要使用随机数的合约）添加到已经存在的 VRF 订阅中
+// add our consumer contract to the existing subscription
 contract AddConsumer is Script {
     function addConsumer(address contractToAddToVrf, address vrfCoordinator, uint256 subId, address account) public {
         console.log("Adding consumer contract: ", contractToAddToVrf);
@@ -63,7 +60,6 @@ contract AddConsumer is Script {
     }
 }
 
-// 为 VRF 订阅提供资金，确保 VRF 服务能够正常运行
 contract FundSubscription is CodeConstants, Script {
     uint96 public constant FUND_AMOUNT = 3 ether;
 
