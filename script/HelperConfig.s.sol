@@ -3,7 +3,6 @@ pragma solidity ^0.8.24;
 
 import {LinkToken} from "../test/mock/LinkToken.sol";
 import {Script, console2} from "forge-std/Script.sol";
-// 本地模拟 VRF
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {EthanToken} from "../src/EthanToken.sol";
 

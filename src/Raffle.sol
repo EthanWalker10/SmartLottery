@@ -11,23 +11,20 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {EthanNft} from "./EthanNft.sol";
 
 /**
- * @title A Lottery Game For NFT
+ * @title A Lottery Game using EthanToken For EthanNft 
  * @author Ethan Walker
- * @dev This implements the Chainlink VRF Version 2
+ * @notice based on chainlink VRF and Automation
+ * @notice EthanToken here, EthanNft to winner
  */
 
 contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
-    /* Errors 
-    * gas efficient
-    * define custom errors by combining the contract name with a description
-    */
+    /* Errors */
     error Raffle__NotRegistered();
     error Raffle__WrongBuyAmount();
     error Raffle__UpkeepNotNeeded(uint256 numPlayers, uint256 raffleState);
     error Raffle__TransferFailed();
     error Raffle__SendMoreToEnterRaffle();
     error Raffle__RaffleNotOpen();
-    error Raffle__OverCrowd();
 
     /* Type declarations */
     enum RaffleState {
@@ -52,9 +49,6 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
     address[] private s_players;
     address[] private s_allUsers;
     mapping(address => bool) public balances;
-
-    uint256 public randomNum; // 看看是不是只要 requestId 不变, 每轮随机数都不变
-    
     RaffleState private s_raffleState;
 
     // Token Variables
@@ -66,12 +60,11 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
 
 
     /* Events */
-    event RequestedRaffleWinner(uint256 indexed requestId);
+    // event RequestedRaffleWinner(uint256 indexed requestId); // only for testing, commenting it out when deploying
     event RaffleEnter(address indexed player);
     event WinnerPicked(address indexed player);
     event RaffleBuyOneToken(address indexed player);
     event RaffleRegister(address indexed player);
-    event RandomNum(uint256 indexed randomNum);
 
 
     /* Functions */
@@ -101,7 +94,6 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
 
     /**
      * Registration
-     * 前 10 名获取空投
      */
     function register() public {
         s_allUsers.push(msg.sender);
@@ -127,11 +119,7 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
         if (s_raffleState != RaffleState.OPEN) {
             revert Raffle__RaffleNotOpen();
         }
-        // if (s_players.length >= 5) {
-        //     revert Raffle__OverCrowd();
-        // }
 
-         // 用户授权合约转移代币，检查并转账 10 个代币（i_entranceFee）
         bool success = IERC20(i_token).transferFrom(msg.sender, address(this), i_entranceFee);
         if (!success) {
             revert Raffle__TransferFailed();
@@ -153,57 +141,46 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = s_players.length > 0;
         upkeepNeeded = (timePassed && isOpen && hasPlayers);
-        return (upkeepNeeded, "0x0"); // `"0x0"` is just `0` in `bytes`, we ain't going to use this return anyway.
+        return (upkeepNeeded, "0x0"); 
     }
     /**
      * @dev Once `checkUpkeep` is returning `true`, this function is called
      * and it kicks off a Chainlink VRF call to get a random winner.
-     * 在这里会通过 vrfCoordinator 来请求随机数, 然后 vrfCoordinator 再调用 fulfillRandomWords(). 
      */
     function performUpkeep(bytes calldata /* performData */ ) external override {
         // if anyone else calls it directly but nothing is checked
         (bool upkeepNeeded,) = checkUpkeep("");
-        // require(upkeepNeeded, "Upkeep not needed");
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(s_players.length, uint256(s_raffleState));
         }
 
-        // change the state of the Raffle when we commence the process of picking the winner
+        // change the state of the Raffle when picking the winner
         s_raffleState = RaffleState.CALCULATING;
 
         // Will revert if subscription is not set and funded.
-        // **s_vrfCoordinator is from parent constract**
-        // s_vrfCoordinator should be used by consumers to make requests to vrfCoordinator
-        // so that coordinator reference is updated after migration
-        // function requestRandomWords(VRFV2PlusClient.RandomWordsRequest calldata req) external returns (uint256 requestId);
-        // ({}) here because {} is used for initializing struct variable and () for param passing
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
                 keyHash: i_gasLane, 
                 subId: i_subscriptionId,
                 requestConfirmations: REQUEST_CONFIRMATIONS,
                 callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS, // 考虑一下到底需要几个随机数
+                numWords: NUM_WORDS,
                 extraArgs: VRFV2PlusClient._argsToBytes(
-                    // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
-                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
+                    // use ETH when sepolia
+                    VRFV2PlusClient.ExtraArgsV1({nativePayment: true}) 
+                    // use link when anvil
+                    // VRFV2PlusClient.ExtraArgsV1({nativePayment: false}) 
                 )
             })
         );
-        // Quiz... is this redundant?
-        // Yes, because there is an event including 'requestid' in `s_vrfCoordinator.requestRandomWords` function
-        // And everything costs gas.
-        emit RequestedRaffleWinner(requestId);
+        // only for testing, commenting out it when deploying
+        // emit RequestedRaffleWinner(requestId);
     }
 
     /**
-     * @dev This is the function that Chainlink VRF node
-     * calls to send the money to the random winner.
-     * we have only one word in randomWords because we set NUM_WORDS = 1
+     * @dev the function that Chainlink VRF node calls to send the money to the random winner.
      */
-    // it's called by the Chainlink node
     function fulfillRandomWords(uint256, /* requestId */ uint256[] calldata randomWords) internal override {
-        randomNum = randomWords[0];
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
@@ -212,7 +189,7 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
         emit WinnerPicked(recentWinner);
-        // 下面应该为 recentWinner 铸造 nft
+        // EthanNft for winner
         EthanNft(i_nft).mintNft(recentWinner);
     }
 

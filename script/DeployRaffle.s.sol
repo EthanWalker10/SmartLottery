@@ -45,6 +45,7 @@ contract DeployRaffle is Script {
     }
 }
 
+// 需要的参数
 // constructor(
 //         uint256 subscriptionId,
 //         bytes32 gasLane, // keyHash

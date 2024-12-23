@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
-// @dev This contract has been adapted to fit with foundry
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import {ERC20} from "@solmate/tokens/ERC20.sol";
 
-// 实现了一个 ERC20 兼容的代币，名为 "LinkToken"（LINK），并且扩展了 ERC20 标准，包含了 ERC677 的功能。
-// be used to mock link address
+// be used to mock link address, supporting ERC20 and ERC677
 
 interface ERC677Receiver {
     function onTokenTransfer(address _sender, uint256 _value, bytes memory _data) external;

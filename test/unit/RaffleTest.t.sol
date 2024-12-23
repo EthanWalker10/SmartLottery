@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {Raffle} from "../../src/Raffle.sol";
@@ -42,7 +42,7 @@ contract RaffleTest is Test, CodeConstants {
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
         (raffle, helperConfig) = deployer.run();
-        vm.deal(PLAYER, STARTING_USER_BALANCE); // 这个暂时就给玩家用来支付 gas 费(好像 anvil 上不需要这女的支付 gas?)
+        vm.deal(PLAYER, STARTING_USER_BALANCE); // for players to pay gas fee
 
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
         subscriptionId = config.subscriptionId;
@@ -64,7 +64,8 @@ contract RaffleTest is Test, CodeConstants {
 
         vm.startPrank(PLAYER);
         ethanToken.mint(PLAYER, 100 ether);
-        ethanToken.approve(address(raffle), raffleEntranceFee); // 首先要允许合约转移代币, 设计前端的时候需要注意这里
+        // approve, then transfer
+        ethanToken.approve(address(raffle), raffleEntranceFee); 
         vm.stopPrank();
     }
 
@@ -88,8 +89,6 @@ contract RaffleTest is Test, CodeConstants {
         // Arrange
         vm.startPrank(PLAYER0);
         // Act / Assert
-        // 每个函数、事件、或者错误都有一个唯一的 selector，它是前 4 个字节的哈希值，用于标识特定的函数、事件或错误。
-        // 通过 expectRevert 和 .selector，不仅预期 enterRaffle() 函数会 revert，还精确地检查是否抛出了特定的自定义错误。
         raffle.register();
         vm.expectRevert(Raffle.Raffle__SendMoreToEnterRaffle.selector);
         raffle.enterRaffle();
@@ -199,7 +198,6 @@ contract RaffleTest is Test, CodeConstants {
         vm.roll(block.number + 1);
 
         // Act / Assert
-        // It doesnt revert
         // using `vm.expectEmit()` and `emit ...` are unconvinient, because the parameter doesn't exist here
         raffle.performUpkeep("");
     }
@@ -232,7 +230,7 @@ contract RaffleTest is Test, CodeConstants {
         Raffle.RaffleState raffleState = raffle.getRaffleState();
         // requestId = raffle.getLastRequestId();
         assert(uint256(requestId) > 0);
-        assert(uint256(raffleState) == 1); // 0 = open, 1 = calculating
+        assert(uint256(raffleState) == 1); 
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -264,13 +262,13 @@ contract RaffleTest is Test, CodeConstants {
         VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(1, address(raffle));
     }
 
-    // the biggest and happiset case
+    // the biggest case
     function testFulfillRandomWordsPicksAWinnerResetsAndMintNft() public raffleRegistered raffleEntered skipFork {
         address expectedWinner = address(1);
 
         // Arrange
         uint256 additionalEntrances = 3;
-        uint256 startingIndex = 1; // We have starting index be 1 so we can start with address(1) and not address(0)
+        uint256 startingIndex = 1; // starting index be 1 so we can start with address(1) and not address(0)
 
         for (uint256 i = startingIndex; i < startingIndex + additionalEntrances; i++) {
             address player = address(uint160(i));
