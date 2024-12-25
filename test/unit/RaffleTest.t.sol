@@ -290,7 +290,6 @@ contract RaffleTest is Test, CodeConstants {
         bytes32 requestId = entries[1].topics[1]; // get the requestId from the logs
 
         VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(raffle));
-        console2.logUint(raffle.randomNum());
         // Assert
         address recentWinner = raffle.getRecentWinner();
         Raffle.RaffleState raffleState = raffle.getRaffleState();

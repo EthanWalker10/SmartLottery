@@ -60,7 +60,7 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
 
 
     /* Events */
-    // event RequestedRaffleWinner(uint256 indexed requestId); // only for testing, commenting it out when deploying
+    event RequestedRaffleWinner(uint256 indexed requestId); // only for testing, commenting it out when deploying
     event RaffleEnter(address indexed player);
     event WinnerPicked(address indexed player);
     event RaffleBuyOneToken(address indexed player);
@@ -174,7 +174,7 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
             })
         );
         // only for testing, commenting out it when deploying
-        // emit RequestedRaffleWinner(requestId);
+        emit RequestedRaffleWinner(requestId);
     }
 
     /**

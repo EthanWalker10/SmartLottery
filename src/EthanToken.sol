@@ -9,7 +9,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * @title EthanToken - for game entrancy
  * @author Ethan Walker
  */
-contract EthanToken is ERC20 {
+contract EthanToken is ERC20, Ownable {
     constructor(uint256 initialSupply) ERC20("EthanToken", "EA") Ownable(msg.sender) {
         _mint(msg.sender, initialSupply);
     }
