@@ -87,7 +87,7 @@ contract HelperConfig is CodeConstants, Script {
             callbackGasLimit: 500000, // 500,000 gas
             vrfCoordinatorV2_5: 0x271682DEB8C4E0901D1a1550aD2e64D568E69909,
             link: 0x514910771AF9Ca656af840dff83E8264EcF986CA,
-            account: 0x643315C9Be056cDEA171F4e7b2222a4ddaB9F88D,
+            account: 0x643315C9Be056cDEA171F4e7b2222a4ddaB9F88D, // for subscription
             ethanToken: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, // haven't deployed yet
             initialTokenUri: "ipfs://QmV9cRvgWiM3MwouAq1wbdQzJnGz2f2UEb3FAmKmD1UZEZ" // haven't created yet
         });
